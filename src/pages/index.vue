@@ -32,7 +32,7 @@ const handleInsulin = async() => {
     <input
       id="input"
       v-model.number="sugar"
-      inputmode="numeric"
+      inputmode="decimal"
       type="text"
       autocomplete="false"
       p="x-4 y-2"
