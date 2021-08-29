@@ -1,42 +1,40 @@
 <script setup lang="ts">
-import { useUserStore } from '~/stores/user'
+import { collection, addDoc } from 'firebase/firestore'
+import { db } from '~/services/firebase'
 
-const user = useUserStore()
-const name = ref(user.savedName)
+const sugar = ref('')
+const insulin = ref('')
+const isGlargin = ref(false)
 
-const router = useRouter()
-const go = () => {
-  if (name.value)
-    router.push(`/hi/${encodeURIComponent(name.value)}`)
+const handleSugar = async() => {
+  await addDoc(collection(db, 'bloodsugars'), {
+    value: +sugar.value,
+    date: new Date(),
+  })
+
+  sugar.value = ''
 }
 
-const { t } = useI18n()
+const handleInsulin = async() => {
+  await addDoc(collection(db, 'insulin'), {
+    value: +insulin.value,
+    isGlargin: isGlargin.value,
+    date: new Date(),
+  })
+
+  insulin.value = ''
+  isGlargin.value = false
+}
 </script>
 
 <template>
   <div>
-    <p class="text-4xl">
-      <carbon-campsite class="inline-block" />
-    </p>
-    <p>
-      <a rel="noreferrer" href="https://github.com/antfu/vitesse" target="_blank">
-        Vitesse
-      </a>
-    </p>
-    <p>
-      <em class="text-sm opacity-75">{{ t('intro.desc') }}</em>
-    </p>
-
-    <div class="py-4" />
-
     <input
       id="input"
-      v-model="name"
-      :placeholder="t('intro.whats-your-name')"
-      :aria-label="t('intro.whats-your-name')"
+      v-model.number="sugar"
+      inputmode="numeric"
       type="text"
       autocomplete="false"
-      @keydown.enter="go"
       p="x-4 y-2"
       w="250px"
       text="center"
@@ -44,15 +42,44 @@ const { t } = useI18n()
       border="~ rounded gray-200 dark:gray-700"
       outline="none active:none"
     >
-    <label class="hidden" for="input">{{ t('intro.whats-your-name') }}</label>
+    <label class="hidden" for="input">Текущий уровень сахара в крови</label>
 
     <div>
       <button
         class="m-3 text-sm btn"
-        :disabled="!name"
-        @click="go"
+        @click="handleSugar"
       >
-        {{ t('button.go') }}
+        Записать сахар
+      </button>
+    </div>
+  </div>
+  <div class="pt-6">
+    <input
+      id="input"
+      v-model.number="insulin"
+      inputmode="numeric"
+      type="text"
+      autocomplete="false"
+      p="x-4 y-2"
+      w="250px"
+      text="center"
+      bg="transparent"
+      border="~ rounded gray-200 dark:gray-700"
+      outline="none active:none"
+    >
+    <label class="hidden" for="input">Количество поставленного инсулина</label>
+
+    <label for="glargin" class="block mt-2">
+      Это ночной инсулин?
+      <input id="glargin" v-model="isGlargin" type="checkbox">
+    </label>
+
+    <div>
+      <button
+        class="m-3 text-sm btn"
+        @click="handleInsulin"
+      >
+        Записать инъекцию инсулина
       </button>
     </div>
   </div>
