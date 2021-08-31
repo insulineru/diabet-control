@@ -7,8 +7,10 @@ const insulin = ref('')
 const isGlargin = ref(false)
 
 const handleSugar = async() => {
+  let sugarValue = sugar.value
+  sugarValue = sugarValue.replace(',', '.')
   await addDoc(collection(db, 'bloodsugars'), {
-    value: +sugar.value,
+    value: +sugarValue,
     date: new Date(),
   })
 
@@ -31,7 +33,7 @@ const handleInsulin = async() => {
   <div>
     <input
       id="input"
-      v-model.number="sugar"
+      v-model="sugar"
       inputmode="decimal"
       type="text"
       autocomplete="false"
